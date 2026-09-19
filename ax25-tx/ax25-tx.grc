@@ -188,7 +188,7 @@ blocks:
     comment: ''
     maxoutbuf: '0'
     minoutbuf: '0'
-    msg: pmt.intern("Hello World!")
+    msg: pmt.intern("ESTO ES UNA PRUEBA PARA EL DESCODIFICADOR")
     period: '2000'
   states:
     bus_sink: false

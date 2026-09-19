@@ -15,7 +15,6 @@ from gnuradio import analog
 import math
 from gnuradio import blocks
 import pmt
-from gnuradio import blocks, gr
 from gnuradio import digital
 from gnuradio import filter
 from gnuradio import gr
@@ -27,6 +26,7 @@ from PyQt5 import Qt
 from argparse import ArgumentParser
 from gnuradio.eng_arg import eng_float, intx
 from gnuradio import eng_notation
+import ax25_rx_epy_block_0 as epy_block_0  # embedded python block
 import satellites
 import sip
 import threading
@@ -128,6 +128,7 @@ class ax25_rx(gr.top_block, Qt.QWidget):
 
         self._qtgui_time_sink_x_0_0_win = sip.wrapinstance(self.qtgui_time_sink_x_0_0.qwidget(), Qt.QWidget)
         self.top_layout.addWidget(self._qtgui_time_sink_x_0_0_win)
+        self.epy_block_0 = epy_block_0.blk()
         self.digital_symbol_sync_xx_0 = digital.symbol_sync_ff(
             digital.TED_ZERO_CROSSING,
             sps,
@@ -140,12 +141,13 @@ class ax25_rx(gr.top_block, Qt.QWidget):
             digital.IR_MMSE_8TAP,
             128,
             [])
-        self.digital_hdlc_deframer_bp_0 = digital.hdlc_deframer_bp(32, 500)
+        self.digital_hdlc_deframer_bp_0 = digital.hdlc_deframer_bp(1, 500)
         self.digital_binary_slicer_fb_0 = digital.binary_slicer_fb()
         self.blocks_throttle2_0 = blocks.throttle( gr.sizeof_gr_complex*1, samp_rate, True, 0 if "auto" == "auto" else max( int(float(0.1) * samp_rate) if "auto" == "time" else int(0.1), 1) )
-        self.blocks_message_debug_0 = blocks.message_debug(True, gr.log_levels.info)
-        self.blocks_file_source_0 = blocks.file_source(gr.sizeof_gr_complex*1, 'ax25_bfsk_tx.iq', True, 0, 0)
+        self.blocks_file_source_0 = blocks.file_source(gr.sizeof_gr_complex*1, 'ax25_bfsk_tx.iq', False, 0, 0)
         self.blocks_file_source_0.set_begin_tag(pmt.PMT_NIL)
+        self.blocks_file_sink_1_0 = blocks.file_sink(gr.sizeof_char*1, 'rx_sliced.bin', False)
+        self.blocks_file_sink_1_0.set_unbuffered(False)
         self.blocks_file_sink_1 = blocks.file_sink(gr.sizeof_char*1, 'rx.bin', False)
         self.blocks_file_sink_1.set_unbuffered(False)
         self.analog_quadrature_demod_cf_0 = analog.quadrature_demod_cf((samp_rate/(2*math.pi*deviation)))
@@ -154,10 +156,11 @@ class ax25_rx(gr.top_block, Qt.QWidget):
         ##################################################
         # Connections
         ##################################################
-        self.msg_connect((self.digital_hdlc_deframer_bp_0, 'out'), (self.blocks_message_debug_0, 'print_pdu'))
+        self.msg_connect((self.digital_hdlc_deframer_bp_0, 'out'), (self.epy_block_0, 'in'))
         self.connect((self.analog_quadrature_demod_cf_0, 0), (self.digital_symbol_sync_xx_0, 0))
         self.connect((self.blocks_file_source_0, 0), (self.blocks_throttle2_0, 0))
         self.connect((self.blocks_throttle2_0, 0), (self.analog_quadrature_demod_cf_0, 0))
+        self.connect((self.digital_binary_slicer_fb_0, 0), (self.blocks_file_sink_1_0, 0))
         self.connect((self.digital_binary_slicer_fb_0, 0), (self.satellites_nrzi_decode_0, 0))
         self.connect((self.digital_symbol_sync_xx_0, 0), (self.digital_binary_slicer_fb_0, 0))
         self.connect((self.digital_symbol_sync_xx_0, 0), (self.qtgui_time_sink_x_0_0, 0))

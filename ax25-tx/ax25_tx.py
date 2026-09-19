@@ -226,7 +226,7 @@ class ax25_tx(gr.top_block, Qt.QWidget):
         self.epy_block_0 = epy_block_0.blk(dest_call="DEST", dest_ssid=0, src_call="SRC", src_ssid=0)
         self.digital_chunks_to_symbols_xx_0 = digital.chunks_to_symbols_bf((-1.0, 1.0), 1)
         self.blocks_repeat_0 = blocks.repeat(gr.sizeof_float*1, sps)
-        self.blocks_message_strobe_0 = blocks.message_strobe(pmt.intern("Hello World!"), 2000)
+        self.blocks_message_strobe_0 = blocks.message_strobe(pmt.intern("ESTO ES UNA PRUEBA PARA EL DESCODIFICADOR"), 2000)
         self.blocks_file_sink_2 = blocks.file_sink(gr.sizeof_char*1, 'tx_2.bin', False)
         self.blocks_file_sink_2.set_unbuffered(False)
         self.blocks_file_sink_1 = blocks.file_sink(gr.sizeof_char*1, 'tx.bin', False)
